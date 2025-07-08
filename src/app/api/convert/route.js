@@ -16,6 +16,8 @@ export async function POST(request) {
   }
   const channel = match[1]
   const ts = match[2].replace(/^(\d{10})(\d{6})$/, "$1.$2")
+  const SLACK_TOKEN = process.env.SLACK_TOKEN
+
   // 2. 슬랙 API 호출 (SLACK_TOKEN 환경변수 필요)
   if (!SLACK_TOKEN) {
     return NextResponse.json({ error: "No Slack token" }, { status: 500 })
