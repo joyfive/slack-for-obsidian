@@ -1,62 +1,97 @@
-"use client";
-import React, { useState } from "react";
+"use client"
+import React, { useState } from "react"
 
 export default function SlackToObsidian() {
-  const [slackUrl, setSlackUrl] = useState("");
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isDownloaded, setIsDownloaded] = useState(false);
-  const [error, setError] = useState("");
+  const [slackUrl, setSlackUrl] = useState("")
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [isDownloaded, setIsDownloaded] = useState(false)
+  const [error, setError] = useState("")
 
-  // 붙여넣기 + 다운로드 (하나의 버튼)
   const handlePasteAndDownload = async () => {
-    setError("");
-    setIsDownloading(true);
-    setIsDownloaded(false);
-    try {
-      // 1. 클립보드 읽기
-      const text = await navigator.clipboard.readText();
-      setSlackUrl(text);
+    setError("")
+    setIsDownloading(true)
+    setIsDownloaded(false)
 
-      if (!text || !/^https?:\/\/.*slack\.com\/archives\//.test(text)) {
-        setError("유효한 Slack 스레드 링크가 아닙니다.");
-        setIsDownloading(false);
-        return;
+    let urlToUse = ""
+
+    // 1. 클립보드 접근 가능여부 체크
+    if (navigator.clipboard) {
+      try {
+        const text = await navigator.clipboard.readText()
+        setSlackUrl(text)
+        urlToUse = text
+      } catch (e) {
+        // 클립보드 접근 실패시 인풋 데이터 fallback
+        urlToUse = slackUrl
       }
-
-      // 2. 백엔드 변환/다운로드 (여기선 임시 대기, 실제 API 호출/다운로드로 교체)
-      await new Promise((res) => setTimeout(res, 1200));
-      // (실제 다운로드 코드 예시)
-      // const res = await fetch("/api/convert", { method: "POST", body: JSON.stringify({ url: text }) });
-      // const blob = await res.blob();
-      // const url = window.URL.createObjectURL(blob);
-      // const a = document.createElement("a");
-      // a.href = url; a.download = "slack_archive.md"; a.click();
-
-      setIsDownloaded(true);
-    } catch (e) {
-      setError("클립보드 접근 또는 다운로드 실패");
-    } finally {
-      setIsDownloading(false);
+    } else {
+      // 클립보드 미지원 브라우저: 인풋 데이터 fallback
+      urlToUse = slackUrl
     }
-  };
+
+    // 2. urlToUse(클립보드 or 인풋)에 데이터 존재 여부
+    if (!urlToUse) {
+      setError("클립보드 접근이 불가하며, 입력된 링크도 없습니다.")
+      setIsDownloading(false)
+      return
+    }
+
+    // 3. 유효한 Slack URL 여부 검사
+    if (!/^https?:\/\/.*slack\.com\/archives\//.test(urlToUse)) {
+      setError("유효한 Slack 스레드 링크가 아닙니다.")
+      setIsDownloading(false)
+      return
+    }
+
+    // 4. 정상 Slack URL이면 API 호출
+    try {
+      const res = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlToUse }),
+      })
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}))
+        setError(
+          errJson?.error ? `API 오류: ${errJson.error}` : "API 호출 실패"
+        )
+        setIsDownloading(false)
+        return
+      }
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "slack_archive.md"
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      setIsDownloaded(true)
+    } catch (e) {
+      setError("다운로드 실패")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   // 단축어 실행
   const handleShortcut = () => {
-    window.location.href = "shortcuts://run-shortcut?name=md_for_obsidian";
-  };
+    window.location.href = "shortcuts://run-shortcut?name=md_for_obsidian"
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
       <div className="w-full max-w-xs flex flex-col gap-5">
-        <h1 className="text-xl font-semibold text-center mb-2">
+        <h1 className="text-xl font-semibold text-center mb-2 text-gray-700">
           Slack → Obsidian md
         </h1>
         <input
           type="text"
-          className="w-full rounded-xl border p-3 text-base focus:outline-none bg-gray-50"
-          placeholder="클립보드의 Slack 스레드 링크가 자동 입력됩니다"
+          className="w-full rounded-xl border p-3 text-base text-gray-600 focus:outline-none bg-gray-50"
+          placeholder="클립보드 또는 직접 붙여넣기"
           value={slackUrl}
-          readOnly
+          onChange={(e) => setSlackUrl(e.target.value)}
         />
 
         <button
@@ -98,5 +133,5 @@ export default function SlackToObsidian() {
         )}
       </div>
     </div>
-  );
+  )
 }
