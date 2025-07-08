@@ -22,6 +22,9 @@ export default function SlackToObsidian() {
         urlToUse = text
       } catch (e) {
         // 클립보드 접근 실패시 인풋 데이터 fallback
+        console.error("클립보드 접근 실패:", e)
+        setError("클립보드 접근이 불가합니다. 인풋 데이터로 대체합니다.")
+        // 인풋 데이터 사용
         urlToUse = slackUrl
       }
     } else {
@@ -69,6 +72,7 @@ export default function SlackToObsidian() {
       window.URL.revokeObjectURL(url)
       setIsDownloaded(true)
     } catch (e) {
+      console.error("다운로드 중 오류 발생:", e)
       setError("다운로드 실패")
     } finally {
       setIsDownloading(false)
