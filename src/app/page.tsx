@@ -1,141 +1,58 @@
-"use client"
-import React, { useState } from "react"
+// Obsidian-themed Mobile-first UI (React + Tailwind)
+// Components: LoginPage, HomePage
 
-export default function SlackToObsidian() {
-  const [slackUrl, setSlackUrl] = useState("")
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [isDownloaded, setIsDownloaded] = useState(false)
-  const [error, setError] = useState("")
+import React from "react"
 
-  const handlePasteAndDownload = async () => {
-    setError("")
-    setIsDownloading(true)
-    setIsDownloaded(false)
+const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
 
-    let urlToUse = ""
-
-    // 1. 클립보드 접근 가능여부 체크
-    if (navigator.clipboard) {
-      try {
-        const text = await navigator.clipboard.readText()
-        setSlackUrl(text)
-        urlToUse = text
-      } catch (e) {
-        // 클립보드 접근 실패시 인풋 데이터 fallback
-        console.error("클립보드 접근 실패:", e)
-        setError("클립보드 접근이 불가합니다. 인풋 데이터로 대체합니다.")
-        // 인풋 데이터 사용
-        urlToUse = slackUrl
-      }
-    } else {
-      // 클립보드 미지원 브라우저: 인풋 데이터 fallback
-      urlToUse = slackUrl
-    }
-
-    // 2. urlToUse(클립보드 or 인풋)에 데이터 존재 여부
-    if (!urlToUse) {
-      setError("클립보드 접근이 불가하며, 입력된 링크도 없습니다.")
-      setIsDownloading(false)
-      return
-    }
-
-    // 3. 유효한 Slack URL 여부 검사
-    if (!/^https?:\/\/.*slack\.com\/archives\//.test(urlToUse)) {
-      setError("유효한 Slack 스레드 링크가 아닙니다.")
-      setIsDownloading(false)
-      return
-    }
-
-    // 4. 정상 Slack URL이면 API 호출
-    try {
-      const res = await fetch("/api/convert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: urlToUse }),
-      })
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}))
-        setError(
-          errJson?.error ? `API 오류: ${errJson.error}` : "API 호출 실패"
-        )
-        setIsDownloading(false)
-        return
-      }
-      const blob = await res.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "slack_archive.md"
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      window.URL.revokeObjectURL(url)
-      setIsDownloaded(true)
-    } catch (e) {
-      console.error("다운로드 중 오류 발생:", e)
-      setError("다운로드 실패")
-    } finally {
-      setIsDownloading(false)
-    }
-  }
-
-  // 단축어 실행
-  const handleShortcut = () => {
-    window.location.href = "shortcuts://run-shortcut?name=md_for_obsidian"
-  }
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4">
-      <div className="w-full max-w-xs flex flex-col gap-5">
-        <h1 className="text-xl font-semibold text-center mb-2 text-gray-700">
-          Slack → Obsidian md
+    <div className="min-h-screen bg-[#f3f1fa] flex flex-col justify-between p-6">
+      <div>
+        <h1 className="text-xl font-bold text-[#111111] mb-2">
+          오늘의 기쁨, 내일의 기쁨으로
         </h1>
-        <input
-          type="text"
-          className="w-full rounded-xl border p-3 text-base text-gray-600 focus:outline-none bg-gray-50"
-          placeholder="클립보드 또는 직접 붙여넣기"
-          value={slackUrl}
-          onChange={(e) => setSlackUrl(e.target.value)}
-        />
+        <p className="text-sm text-[#555555] mb-6">
+          슬랙에 흘려쓴 메시지를 옵시디언에 남겨두세요. 오늘의 기억을 모아,
+          나만의 기록으로 아카이빙합니다.
+        </p>
 
-        <button
-          onClick={handlePasteAndDownload}
-          disabled={isDownloading}
-          className={`w-full py-2 rounded-xl ${
-            isDownloading
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-black text-white hover:bg-gray-800"
-          } text-base font-semibold`}
-        >
-          {isDownloading
-            ? "붙여넣기 및 다운로드 중..."
-            : "붙여넣기 및 다운로드"}
-        </button>
+        <div className="mb-4">
+          <label className="block text-[#111111] text-sm font-medium mb-1">
+            오늘의 기록
+          </label>
+          <button className="w-full bg-[#6C4AB6] text-white py-2 rounded-md text-sm">
+            [{today}] 기록 보기
+          </button>
+        </div>
 
-        <button
-          onClick={handleShortcut}
-          disabled={!isDownloaded}
-          className={`w-full py-2 rounded-xl ${
-            !isDownloaded
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 text-white hover:bg-indigo-700"
-          } text-base font-semibold`}
-        >
-          단축어 실행(Obsidian 이동)
-        </button>
-
-        {isDownloaded && (
-          <div className="text-green-700 text-center text-sm">
-            다운로드 완료!
-            <br />
-            단축어 실행 버튼을 눌러 Obsidian으로 이동하세요.
+        <div className="mb-8">
+          <label className="block text-[#111111] text-sm font-medium mb-1">
+            구간 기록
+          </label>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="date"
+              placeholder="시작일"
+              className="flex-1 p-2 border border-[#ececec] rounded-md text-sm text-[#111111]"
+            />
+            <span className="text-[#999999] text-sm">~</span>
+            <input
+              type="date"
+              defaultValue={today}
+              className="flex-1 p-2 border border-[#ececec] rounded-md text-sm text-[#111111]"
+            />
           </div>
-        )}
-
-        {error && (
-          <div className="text-red-500 text-center text-xs mt-2">{error}</div>
-        )}
+          <button className="w-full bg-[#6C4AB6] text-white py-2 rounded-md text-sm">
+            구간 기록 보기
+          </button>
+        </div>
       </div>
+
+      <footer className="border-t border-[#ececec] pt-4 flex justify-between text-sm text-[#555555]">
+        <button className="underline">옵시디언으로 이동</button>
+        <button className="underline">로그아웃</button>
+      </footer>
     </div>
   )
 }
