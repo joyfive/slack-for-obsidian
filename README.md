@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📄 **Light PRD - Slack → Obsidian 아카이빙 툴**
 
-## Getting Started
+## 🧩 목적
 
-First, run the development server:
+> 슬랙 메시지를 단축어 없이 빠르게 `.md` 포맷으로 변환하여 Obsidian에 기록하기 위함.  
+> 특히 **날짜 기반의 대화 수집**과 **선택적 메시지 추출**을 통해, 일간/기간 아카이빙을 유연하게 처리하고자 한다.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✅ 현재 구현된 기능 (AS-IS)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Slack 개인 워크스페이스 세팅
+- 슬랙 메시지 링크 단건 입력 시 `.md`로 추출
+- Slack 봇 등록 및 API 구성 완료
+- 단일 메시지 스레드 단위 아카이빙
+- iOS Shortcuts 등록 및 자동화 실행 지원
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🚀 개선 방향 (TO-BE)
 
-To learn more about Next.js, take a look at the following resources:
+### 1. **기능 확장**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### 1-1. 날짜 기반 메시지 추출
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 오늘 날짜 메시지 추출
+  - 버튼명: `오늘의 기록 보기`
+- 기간 설정 메시지 추출
+  - UI: `시작일 / 종료일` → 버튼명: `구간 기록 보기`
+- API: 날짜 조건에 맞는 메시지 리스트 fetch
+  - (예: `GET /api/messages?from=YYYY-MM-DD&to=YYYY-MM-DD`)
 
-## Deploy on Vercel
+#### 1-2. 메시지 선택 모달 (공통)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 버튼 클릭 시 모달 열림 (viewport 기준 `width 70%`, `height 80%`)
+- 모달 상단: `오늘의 기록` 또는 `구간 기록` (닫기 버튼 포함)
+- 메시지 리스트:
+  - 체크박스
+  - 채널명, 메시지 본문, 입력 시간, 스레드 메시지 포함
+  - 디폴트: 전체 선택
+- 모달 하단 버튼:
+  - `.md로 추출`
+    - **선택한 메시지만 변환 대상**
+    - 다운로드 트리거
+  - `그만보기` (모달 닫기)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+### 2. **마크다운 변환 규칙**
+
+#### 💾 .md 아웃풋 규격
+
+- 채널 단위 구분선 (`---`), 채널은 ## header2 사용
+- Frontmatter YAML (옵션)
+
+  ```yaml
+  ---
+  date: 2025-07-15
+  messages: 6
+  ---
+  ```
+
+#### ✍️ 메시지 구성
+
+- `- [시간] 메시지 텍스트`
+- 유저명은 생략, 봇 메시지 제외
+- 블럭/들여쓰기/파일 등 다양한 메시지 형식 대응
+- 추후 옵션: 채널명, 태그 자동 삽입
+
+---
+
+## 🖥️ UI 구성 요약
+
+### 📍 로그인
+
+- 아이디 / 비밀번호 인풋 2종, 로그인 버튼
+  - 토큰이 연동되어있고, url 직접 입력이 아닌 기간 기능 추출로 인해 로그인 기능 추가
+
+### 📍 홈 화면
+
+- [오늘의 기록 보기] (`today` 기본값)
+- [구간 기록 보기] (날짜 input 2개)
+
+### 📍 메시지 선택 모달
+
+- 채널 별 메시지 렌더링
+- 체크박스 다중 선택 가능
+- 하단: `.md로 추출` / `그만보기`
+
+---
+
+## 🛠 기술/설계 고려사항
+
+| 항목          | 설명                                                                         |
+| ------------- | ---------------------------------------------------------------------------- |
+| 슬랙 API      | `conversations.history`, `conversations.replies`, `users.info`, `files.list` |
+| 보안          | SLACK_TOKEN은 Vercel 환경변수로 주입                                         |
+| 다운로드 방식 | 백엔드에서 `.md` 파일 응답 (`Content-Disposition`)                           |
+| Obsidian 연동 | 단축어 실행 링크 or 유저 수동 옮기기                                         |
+| 메시지 필터링 | 봇 메시지 제외 / 블락 메시지 포함 여부 지정 예정                             |
+
+---
+
+[[Slack_to_obsidian API 명세서]]
+
+## ⏭️ 다음 Step
+
+1. `/api/messages` → 날짜 기반 메시지 fetch API 정의
+2. 프론트 모달 UI (메시지 체크 UI)
+3. `.md` 변환 유틸 함수 정비
+4. 실제 다운로드 연동 완료
