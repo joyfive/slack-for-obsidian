@@ -8,8 +8,13 @@ import { useRouter } from "next/navigation"
 export default function LoginPage() {
   const [id, setId] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
+  const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
   const login = () => {
+    setIsLoading(true)
+    setError("")
     // Simulate a login request
     fetch("/api/login", {
       method: "POST",
@@ -20,16 +25,24 @@ export default function LoginPage() {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log("Login response:", data)
         if (data.ok) {
+          console.log("Login successful:", data)
+          setIsLoading(false)
+          sessionStorage.setItem("token", data.token) // Store token in session storage
+          sessionStorage.setItem("auth_date", today) // Store token in session storage
           router.push("/")
           // Redirect to home page or perform other actions
         } else {
-          alert("로그인 실패")
+          setIsLoading(false)
+          console.error("Login failed:", data.error)
+          setError("로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다.")
         }
       })
       .catch((error) => {
+        setIsLoading(false)
         console.error("Login error:", error)
-        alert("로그인 중 오류 발생")
+        setError("로그인 중 오류 발생: " + error.message)
       })
   }
   return (
@@ -51,10 +64,12 @@ export default function LoginPage() {
         disabled={false}
         variant="primary"
         onClick={login}
+        isLoading={isLoading}
         className="w-full max-w-xs"
       >
         로그인
       </Button>
+      <p className="text-sm text-pink-500 mt-4">{error}</p>
     </div>
   )
 }
