@@ -50,52 +50,52 @@ export default function HomePage() {
     </div>
   else
     return (
-      <div className="min-h-screen bg-[#f3f1fa] flex flex-col justify-between p-6">
+      <div className="min-h-screen bg-[#f6f4fc] px-6 py-12 flex flex-col justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#111111] mb-2">
+          <h1 className="text-2xl font-bold text-[#111111] mb-2">
             오늘의 기쁨, 내일의 기쁨으로
           </h1>
-          <p className="text-sm text-[#555555] mb-6">
-            슬랙에 흘려쓴 메시지를 옵시디언에 남겨두세요. 오늘의 기억을 모아,
+          <p className="text-sm text-[#555555] mb-8">
+            슬랙에 흘러쓴 메시지를 옵시디언에 남겨두세요. 오늘의 기억을 모아,
             나만의 기록으로 아카이빙합니다.
           </p>
 
-          <div className="mb-4">
-            <label className="block text-[#111111] text-sm font-medium mb-1">
-              오늘의 기록
-            </label>
-            <Button className="w-full bg-[#6C4AB6] text-white py-2 rounded-md text-sm">
-              [{today}] 기록 보기
-            </Button>
-          </div>
-
-          <div className="mb-8">
-            <label className="block text-[#111111] text-sm font-medium mb-1">
-              구간 기록
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="date"
-                placeholder="시작일"
-                className="flex-1 p-2 border border-[#ececec] rounded-md text-sm text-[#111111]"
-              />
-              <span className="text-[#999999] text-sm">~</span>
-              <input
-                type="date"
-                defaultValue={today}
-                className="flex-1 p-2 border border-[#ececec] rounded-md text-sm text-[#111111]"
-              />
+          <section className="space-y-6">
+            <div>
+              <h2 className="text-sm font-medium text-[#555555] mb-2">
+                오늘의 기록
+              </h2>
+              <Button className="w-full py-3 rounded-lg text-white font-medium bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6]">
+                오늘의 기록 보기
+              </Button>
             </div>
-            <Button className="w-full bg-[#6C4AB6] text-white py-2 rounded-md text-sm">
-              구간 기록 보기
-            </Button>
-          </div>
+
+            <div>
+              <h2 className="text-sm font-medium text-[#555555] mb-2 ">
+                구간 기록
+              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="date"
+                  className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
+                />
+                <span className="text-[#999999]">~</span>
+                <input
+                  type="date"
+                  className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
+                />
+              </div>
+              <Button className="w-full py-3 rounded-lg text-white font-medium bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6]">
+                구간 기록 보기
+              </Button>
+            </div>
+          </section>
         </div>
 
-        <footer className="border-t border-[#ececec] pt-4 flex justify-between text-sm text-[#555555]">
-          <button className="underline">옵시디언으로 이동</button>
-          <button className="underline">로그아웃</button>
-        </footer>
+        <div className="pt-6 border-t border-[#ececec] flex justify-between text-sm text-[#555555]">
+          <button className="hover:underline">옵시디언으로 이동</button>
+          <button className="hover:underline">로그아웃</button>
+        </div>
       </div>
     )
 }
