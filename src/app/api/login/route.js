@@ -1,4 +1,5 @@
 // /app/api/login/route.js (Next.js 13+)
+import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function POST(req) {
@@ -8,11 +9,22 @@ export async function POST(req) {
   const body = await req.json()
   console.log(token)
   if ((body.id = id && body.pw === pw)) {
-    return new NextResponse(JSON.stringify({ ok: true }), {
-      status: 200,
-      token: token,
-    })
+    cookies().set("LOGIN_TOKEN", token)
+    cookies().set("auth_date", new Date().toISOString().slice(0, 10)) // Store token in cookies
+    return new NextResponse(
+      JSON.stringify({
+        ok: true,
+        token,
+        auth_date: cookies().get("auth_date"),
+      }),
+      {
+        status: 200,
+      }
+    )
   } else {
+    ;(await cookies())
+      .delete("LOGIN_TOKEN")(await cookies())
+      .delete("auth_date")
     return new NextResponse(JSON.stringify({ ok: false }), {
       status: 401,
     })

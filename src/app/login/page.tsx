@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+
   const login = () => {
     setIsLoading(true)
     setError("")
@@ -25,12 +25,8 @@ export default function LoginPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Login response:", data)
         if (data.ok) {
-          console.log("Login successful:", data)
           setIsLoading(false)
-          sessionStorage.setItem("token", data.token) // Store token in session storage
-          sessionStorage.setItem("auth_date", today) // Store token in session storage
           router.push("/")
           // Redirect to home page or perform other actions
         } else {

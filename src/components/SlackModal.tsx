@@ -1,7 +1,7 @@
 // SlackMessageModal.tsx
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/button"
 import Checkbox from "@/components/checkbox"
 import Modal from "@/components/Modal"
@@ -22,6 +22,7 @@ interface SlackMessageModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
+  date?: { startDate: string; endDate: string }
   messages: Message[]
 }
 
@@ -29,6 +30,7 @@ export default function SlackMessageModal({
   isOpen,
   onClose,
   title,
+  date = { startDate: "", endDate: "" },
   messages,
 }: SlackMessageModalProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -36,6 +38,29 @@ export default function SlackMessageModal({
     Record<string, boolean>
   >({})
 
+  useEffect(() => {
+    if (isOpen) {
+      fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          startDate: date.startDate,
+          endDate: date.endDate,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.ok) {
+            console.log("Messages fetched successfully:", data.messages)
+            messages = data.messages // Update messages with fetched data
+          } else {
+            console.error("Failed to fetch messages:", data.error)
+          }
+        })
+    }
+  }, [isOpen])
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
