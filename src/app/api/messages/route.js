@@ -7,7 +7,21 @@ function toUnixTimestamp(dateStr) {
   const date = new Date(dateStr)
   return isNaN(date.getTime()) ? null : Math.floor(date.getTime() / 1000)
 }
+function formatSlackTimestamp(ts) {
+  const [secondsStr, microStr] = ts.split(".")
+  const timestampMs =
+    parseInt(secondsStr) * 1000 + Math.floor(parseInt(microStr) / 1000) // 밀리초 단위로 변환
+  const date = new Date(timestampMs)
 
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, "0")
+  const dd = String(date.getDate()).padStart(2, "0")
+  const hh = String(date.getHours()).padStart(2, "0")
+  const min = String(date.getMinutes()).padStart(2, "0")
+  const ss = String(date.getSeconds()).padStart(2, "0")
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`
+}
 function getDateRange(startDateStr, endDateStr) {
   if (!endDateStr) throw new Error("endDate는 필수입니다")
 
@@ -49,8 +63,8 @@ export async function GET(req) {
     if (messagesData.ok && Array.isArray(messagesData.messages)) {
       const formattedMessages = messagesData.messages.map((msg) => ({
         text: msg.text,
-        ts: msg.ts,
-        thread_ts: msg.thread_ts || null,
+        ts: formatSlackTimestamp(msg.ts),
+        thread_ts: formatSlackTimestamp(msg.thread_ts) || null,
         reply_count: msg.reply_count || 0,
       }))
       results.push(...formattedMessages)

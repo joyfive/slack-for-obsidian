@@ -11,7 +11,7 @@ import Spinner from "./spinner"
 interface Message {
   id: string
   channel: string
-  timestamp: string
+  ts: string
   text: string
   thread_ts: string | null
   reply_count: number // Optional, depending on API response
@@ -184,10 +184,10 @@ export default function SlackMessageModal({
                                 className="mt-1"
                               />
                               <div>
-                                <div className="text-sm text-gray-500 mb-1">
-                                  {msg.timestamp}
+                                <div className="text-xs text-gray-500 mb-1">
+                                  {msg.ts}
                                 </div>
-                                <div className="text-gray-800 whitespace-pre-wrap mb-2">
+                                <div className="text-sm text-gray-700 whitespace-pre-wrap mb-2">
                                   {msg.text}
                                 </div>
 
