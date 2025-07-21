@@ -1,0 +1,70 @@
+import { NextResponse } from "next/server"
+
+const SLACK_TOKEN = process.env.SLACK_TOKEN
+const SLACK_API_BASE = "https://slack.com/api"
+
+function toUnixTimestamp(dateStr) {
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? null : Math.floor(date.getTime() / 1000)
+}
+
+function getDateRange(startDateStr, endDateStr) {
+  if (!endDateStr) throw new Error("endDate는 필수입니다")
+
+  const endTs = toUnixTimestamp(endDateStr)
+  if (endTs === null) throw new Error("endDate가 유효하지 않습니다")
+
+  const startTs = toUnixTimestamp(startDateStr)
+
+  if (!startDateStr || startTs === null) {
+    const dayStart = new Date(endDateStr)
+    dayStart.setHours(0, 0, 0, 0)
+    const oldest = Math.floor(dayStart.getTime() / 1000)
+    return { oldest, latest: oldest + 86400 }
+  }
+
+  return { oldest: startTs, latest: endTs + 86400 }
+}
+
+export async function GET(req) {
+  try {
+    // ✅ 파라미터 파싱
+    const { searchParams } = new URL(req.url)
+    const startDate = searchParams.get("startDate") || ""
+    const endDate = searchParams.get("endDate") || ""
+    const channelId = searchParams.get("channelId")
+    const channelName = searchParams.get("channelName")
+    const { oldest, latest } = getDateRange(startDate, endDate)
+    console.log(startDate, endDate, oldest, latest, channelId, channelName)
+    const messagesRes = await fetch(
+      `${SLACK_API_BASE}/conversations.history?channel=${channelId}&oldest=${oldest}&latest=${latest}&inclusive=true`,
+      {
+        headers: { Authorization: `Bearer ${SLACK_TOKEN}` },
+      }
+    )
+    console.log("messagesRes", messagesRes)
+    const messagesData = await messagesRes.json()
+    console.log("messagesData", messagesData)
+    const results = []
+    if (messagesData.ok && Array.isArray(messagesData.messages)) {
+      const formattedMessages = messagesData.messages.map((msg) => ({
+        text: msg.text,
+        ts: msg.ts,
+        thread_ts: msg.thread_ts || null,
+        reply_count: msg.reply_count || 0,
+      }))
+      results.push(...formattedMessages)
+      console.log(`채널 ${channelName} 메시지 처리 성공`, results)
+      return NextResponse.json({ ok: true, results }, { status: 200 })
+    } else {
+      console.warn(`채널 ${channelName} 메시지 처리 실패`, messagesData)
+      return NextResponse.json(
+        { ok: false, message: "메시지 처리 실패" },
+        { status: 400 }
+      )
+    }
+  } catch (err) {
+    console.error("GET /api/messages error:", err)
+    return NextResponse.json({ ok: false, error: err.message }, { status: 500 })
+  }
+}

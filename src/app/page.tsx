@@ -8,39 +8,13 @@ import { Button } from "@/components/button"
 import Spinner from "@/components/spinner"
 import SlackModal from "@/components/SlackModal"
 const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
-const messages = [
-  {
-    id: "1",
-    channel: "general",
-    timestamp: "2023-10-01 12:00",
-    text: "Hello, team!",
-    replies: [
-      {
-        id: "1-1",
-        text: "Hi there!",
-        timestamp: "2023-10-01 12:05",
-      },
-    ],
-  },
-  {
-    id: "2",
-    channel: "general",
-    timestamp: "2023-10-01 13:00",
-    text: "Random thoughts here.",
-  },
-  {
-    id: "3",
-    channel: "random",
-    timestamp: "2023-10-01 13:00",
-    text: "Random thoughts here.",
-  },
-]
+
 export default function HomePage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [title, setTitle] = useState("오늘의 기록")
-  const [date, setDate] = useState({ startDate: today, endDate: today })
+  const [date, setDate] = useState({ startDate: "", endDate: today })
 
   useEffect(() => {
     fetch("/api/auth", {
@@ -52,7 +26,6 @@ export default function HomePage() {
       .then((response) => response)
       .then((data) => {
         if (data.ok) {
-          console.log("Authentication successful:", data)
           setIsAuthenticated(true)
           sessionStorage.setItem("auth_date", today) // Store token in session storage
           // Redirect to home page or perform other actions
@@ -73,14 +46,12 @@ export default function HomePage() {
     setTitle("오늘의 기록[" + date.endDate + "]")
     setDate({ startDate: "", endDate: today })
     setIsOpen(true)
-    console.log(isOpen, title)
   }
 
   const periodOpen = () => {
     setTitle("구간 기록[" + date.startDate + " ~ " + date.endDate + "]")
     setDate({ startDate: date.startDate, endDate: date.endDate })
     setIsOpen(true)
-    console.log(isOpen, title)
   }
 
   if (!isAuthenticated)
@@ -118,11 +89,23 @@ export default function HomePage() {
               </h2>
               <div className="flex items-center gap-2 mb-2">
                 <input
+                  onChange={(e) =>
+                    setDate({
+                      startDate: e.target.value,
+                      endDate: date.endDate,
+                    })
+                  }
                   type="date"
                   className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
                 />
                 <span className="text-[#999999]">~</span>
                 <input
+                  onChange={(e) =>
+                    setDate({
+                      startDate: date.startDate,
+                      endDate: e.target.value,
+                    })
+                  }
                   type="date"
                   className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
                 />
@@ -139,7 +122,6 @@ export default function HomePage() {
         {isOpen && (
           <SlackModal
             date={date}
-            messages={messages}
             title={title}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}

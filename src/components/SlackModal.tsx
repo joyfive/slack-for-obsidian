@@ -5,17 +5,17 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/button"
 import Checkbox from "@/components/checkbox"
 import Modal from "@/components/Modal"
+import { ChevronDown, ChevronRight } from "lucide-react"
+import Spinner from "./spinner"
 
 interface Message {
   id: string
   channel: string
   timestamp: string
   text: string
-  replies?: {
-    id: string
-    text: string
-    timestamp: string
-  }[]
+  thread_ts: string | null
+  reply_count: number // Optional, depending on API response
+  replies?: { id: string; text: string }[] // Optional, depending on API
 }
 
 interface SlackMessageModalProps {
@@ -23,7 +23,6 @@ interface SlackMessageModalProps {
   onClose: () => void
   title: string
   date?: { startDate: string; endDate: string }
-  messages: Message[]
 }
 
 export default function SlackMessageModal({
@@ -31,47 +30,85 @@ export default function SlackMessageModal({
   onClose,
   title,
   date = { startDate: "", endDate: "" },
-  messages,
 }: SlackMessageModalProps) {
+  const [channels, setChannels] = useState([{ id: "", name: "" }])
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>({})
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [expandedReplies, setExpandedReplies] = useState<
     Record<string, boolean>
   >({})
+  const [loading, setLoading] = useState(false)
+  const allIds = Object.keys(messagesMap).flatMap((chId) =>
+    messagesMap[chId].map((msg) => msg.id)
+  )
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/api/messages", {
-        method: "POST",
+      fetch(`/api/channels`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          startDate: date.startDate,
-          endDate: date.endDate,
-        }),
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.ok) {
-            console.log("Messages fetched successfully:", data.messages)
-            messages = data.messages // Update messages with fetched data
+            console.log("Messages fetched successfully:", data)
+            setChannels(data.results)
           } else {
             console.error("Failed to fetch messages:", data.error)
           }
         })
     }
-  }, [isOpen])
+    console.log("useEffect", date)
+  }, [isOpen, date])
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     )
   }
 
   const toggleReplies = (id: string) => {
-    setExpandedReplies((prev) => ({ ...prev, [id]: !prev[id] }))
+    setExpandedReplies((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
   }
 
-  const allIds = messages.map((m) => m.id)
+  const toggleChannel = async (channelId: string, channelName: string) => {
+    console.log("toggleChannel", channelId, channelName)
+    // 이미 열린 채널이라면 닫기
+    if (expanded === channelId) {
+      setExpanded(null)
+      return
+    }
+
+    // 채널 확장
+    setExpanded(channelId)
+
+    // 이미 메시지를 불러온 적이 있다면 API 호출 생략
+    if (!messagesMap[channelId]) {
+      try {
+        setLoading(true)
+        const res = await fetch(
+          `/api/messages?channelId=${channelId}&channelName=${channelName}&startDate=${date.startDate}&endDate=${date.endDate}`
+        )
+        const data = await res.json()
+        console.log("api 반환성공", data)
+        setLoading(false)
+        if (data.ok) {
+          setMessagesMap((prev) => ({ ...prev, [channelId]: data.results }))
+        } else {
+          console.error("메시지 요청 실패", data)
+        }
+      } catch (err) {
+        console.error("에러 발생", err)
+      }
+    }
+  }
+
   const toggleSelectAll = () => {
     setSelectedIds((prev) => (prev.length === allIds.length ? [] : allIds))
   }
@@ -88,7 +125,7 @@ export default function SlackMessageModal({
           </button>
         </div>
 
-        <div className="flex-shrink-0 mb-2 text-sm text-gray-700">
+        <div className="flex items-center flex-shrink-0 mb-2 text-sm text-gray-700">
           <Checkbox
             checked={selectedIds.length === allIds.length}
             onChange={toggleSelectAll}
@@ -97,69 +134,106 @@ export default function SlackMessageModal({
           전체 선택
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-6 pr-2">
-          {Array.from(new Set(messages.map((m) => m.channel))).map(
-            (channel) => (
-              <div key={channel}>
-                <h3 className="text-base font-semibold text-[#333] mb-2">
-                  # {channel}
-                </h3>
-                {messages
-                  .filter((m) => m.channel === channel)
-                  .map((msg) => (
-                    <div
-                      key={msg.id}
-                      className="border border-gray-200 rounded-md p-4 mb-4 bg-gray-50"
-                    >
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                          checked={selectedIds.includes(msg.id)}
-                          onChange={() => toggleSelect(msg.id)}
-                          className="mt-1"
-                        />
-                        <div>
-                          <div className="text-sm text-gray-500 mb-1">
-                            {msg.timestamp}
-                          </div>
-                          <div className="text-gray-800 mb-2 whitespace-pre-wrap">
-                            {msg.text}
-                          </div>
-                          {msg.replies && msg.replies.length > 0 && (
-                            <div>
-                              <button
-                                onClick={() => toggleReplies(msg.id)}
-                                className="text-blue-500 text-sm hover:underline"
-                              >
-                                💬 댓글 {msg.replies.length}개 보기
-                              </button>
-                              {expandedReplies[msg.id] && (
-                                <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
-                                  {msg.replies.map((r) => (
-                                    <div
-                                      key={r.id}
-                                      className="text-sm text-gray-700"
-                                    >
-                                      • {r.text}
-                                      <span className="text-xs text-gray-400 ml-2">
-                                        {r.timestamp}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+        <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+          {channels.map((ch) => (
+            <div
+              key={ch.id}
+              className="border border-purple-100 rounded-md bg-white px-4 py-3 shadow-purple-100 shadow-sm"
+            >
+              {/* 채널 헤더 */}
+              <button
+                onClick={() => toggleChannel(ch.id, ch.name)}
+                className="flex items-center text-md font-medium text-gray-600 w-full"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span># {ch.name}</span>
+                  {expanded === ch.id ? (
+                    <ChevronDown size={16} color="#777" className="mr-1" />
+                  ) : (
+                    <ChevronRight size={16} color="#777" className="mr-1" />
+                  )}
+                </div>
+                {messagesMap[ch.id]?.length > 0 && (
+                  <span className="ml-2 text-sm text-gray-400">
+                    ({messagesMap[ch.id].length})
+                  </span>
+                )}
+              </button>
+
+              {/* 메시지 리스트 */}
+              {expanded === ch.id && (
+                <div className="mt-3 space-y-3">
+                  {loading && (
+                    <div className="text-sm text-gray-500">
+                      <Spinner size={16} />
                     </div>
-                  ))}
-              </div>
-            )
-          )}
+                  )}
+                  {messagesMap[ch.id] && messagesMap[ch.id].length > 0 ? (
+                    messagesMap[ch.id].map(
+                      (msg) => (
+                        console.log("msg", msg),
+                        (
+                          <div
+                            key={msg.id}
+                            className="border border-purple-200 rounded-sm p-3 bg-purple-50"
+                          >
+                            <div className="flex items-start gap-2">
+                              <Checkbox
+                                checked={selectedIds.includes(msg.id)}
+                                onChange={() => toggleSelect(msg.id)}
+                                className="mt-1"
+                              />
+                              <div>
+                                <div className="text-sm text-gray-500 mb-1">
+                                  {msg.timestamp}
+                                </div>
+                                <div className="text-gray-800 whitespace-pre-wrap mb-2">
+                                  {msg.text}
+                                </div>
+
+                                {msg.thread_ts !== null &&
+                                  msg.reply_count > 0 && (
+                                    <>
+                                      <button
+                                        onClick={() => toggleReplies(msg.id)}
+                                        className="text-blue-500 text-sm hover:underline"
+                                      >
+                                        💬 댓글 {msg.reply_count}개 보기
+                                      </button>
+                                      {console.log(expandedReplies[msg.id])}
+                                      {/* {expandedReplies[msg.id] && (
+                                        <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
+                                          {msg.replies.map((r) => (
+                                            <div
+                                              key={r.id}
+                                              className="text-sm text-gray-700"
+                                            >
+                                              🗨 {r.text}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )} */}
+                                    </>
+                                  )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      )
+                    )
+                  ) : (
+                    <div className="text-sm text-gray-400 ">
+                      추출할 메시지가 없습니다
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         <div className="flex items-center justify-between mt-4 border-t pt-4">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-400">
             ({selectedIds.length}개 선택됨)
           </span>
           <div className="flex gap-2">
