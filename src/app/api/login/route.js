@@ -7,7 +7,7 @@ export async function POST(req) {
   const pw = process.env.PW
   const token = process.env.LOGIN_TOKEN
   const body = await req.json()
-  console.log(token)
+  console.log(token, process.env.LOGIN_TOKEN)
   if ((body.id = id && body.pw === pw)) {
     console.log("로그인 성공", token)
     cookies().set("LOGIN_TOKEN", token)
