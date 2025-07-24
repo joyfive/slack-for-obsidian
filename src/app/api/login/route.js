@@ -9,12 +9,14 @@ export async function POST(req) {
   const body = await req.json()
   console.log(token)
   if ((body.id = id && body.pw === pw)) {
+    console.log("로그인 성공", token)
     cookies().set("LOGIN_TOKEN", token)
     cookies().set("auth_date", new Date().toISOString().slice(0, 10)) // Store token in cookies
+
     return new NextResponse(
       JSON.stringify({
         ok: true,
-        token,
+        token: cookies().get("LOGIN_TOKEN"),
         auth_date: cookies().get("auth_date"),
       }),
       {
