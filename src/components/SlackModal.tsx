@@ -15,7 +15,7 @@ interface Message {
   text: string
   thread_ts: string | null
   reply_count: number // Optional, depending on API response
-  replies?: { id: string; text: string }[] // Optional, depending on API
+  replies?: { ts: string; text: string; thread_ts: string }[] // Optional, depending on API
 }
 
 interface SlackMessageModalProps {
@@ -35,13 +35,12 @@ export default function SlackMessageModal({
   const [expanded, setExpanded] = useState<string | null>(null)
   const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>({})
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [expandedReplies, setExpandedReplies] = useState<
-    Record<string, boolean>
-  >({})
+  const [expandedReplies, setExpandedReplies] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const allIds = Object.keys(messagesMap).flatMap((chId) =>
-    messagesMap[chId].map((msg) => msg.id)
-  )
+  const allIds: string[] = Object.keys(messagesMap).flatMap((chId) => {
+    if (!messagesMap[chId]) return []
+    else return (messagesMap[chId] ?? []).map((msg) => msg.id)
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -70,13 +69,56 @@ export default function SlackMessageModal({
     )
   }
 
-  const toggleReplies = (id: string) => {
-    setExpandedReplies((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
-  }
+  const toggleReplies = async (
+    msgChannel: string,
+    msgThreadTs: string,
+    msgTs: string
+  ) => {
+    // 이미 열린 댓글이라면 닫기
+    if (expanded === msgThreadTs) {
+      setExpandedReplies(null)
+      return
+    }
 
+    // 채널 확장
+    setExpandedReplies(msgThreadTs)
+
+    // 이미 댓글을 불러온 적이 있다면 API 호출 생략
+    if (!messagesMap[msgThreadTs]) {
+      try {
+        setLoading(true)
+        console.log("Fetching replies for", msgChannel, msgThreadTs, msgTs)
+        const res = await fetch(
+          `/api/messages/thread?channel=${msgChannel}&ts=${msgThreadTs}`
+        )
+        const data = await res.json()
+        console.log("api 반환성공", data)
+        setLoading(false)
+        if (data.ok) {
+          console.log("Replies loaded:", data.replies, messagesMap)
+
+          // 메시지 맵에 댓글 추가
+          setMessagesMap((prev) => ({
+            ...prev,
+            [msgChannel]:
+              prev[msgChannel]?.map((msg) =>
+                msg.thread_ts === msgThreadTs
+                  ? { ...msg, replies: data.replies }
+                  : msg
+              ) ?? [],
+          }))
+
+          console.log("최종 메시지맵:", messagesMap)
+        } else {
+          console.error("메시지 요청 실패", data)
+        }
+      } catch (err) {
+        console.error("에러 발생", err)
+      }
+    }
+
+    setExpandedReplies(msgThreadTs)
+  }
   const toggleChannel = async (channelId: string, channelName: string) => {
     console.log("toggleChannel", channelId, channelName)
     // 이미 열린 채널이라면 닫기
@@ -174,13 +216,13 @@ export default function SlackMessageModal({
                         console.log("msg", msg),
                         (
                           <div
-                            key={msg.id}
+                            key={msg.ts}
                             className="border border-purple-200 rounded-sm p-3 bg-purple-50"
                           >
                             <div className="flex items-start gap-2">
                               <Checkbox
-                                checked={selectedIds.includes(msg.id)}
-                                onChange={() => toggleSelect(msg.id)}
+                                checked={selectedIds.includes(msg.ts)}
+                                onChange={() => toggleSelect(msg.ts)}
                                 className="mt-1"
                               />
                               <div>
@@ -195,24 +237,33 @@ export default function SlackMessageModal({
                                   msg.reply_count > 0 && (
                                     <>
                                       <button
-                                        onClick={() => toggleReplies(msg.id)}
+                                        onClick={() => {
+                                          toggleReplies(
+                                            ch.id,
+                                            msg.thread_ts!,
+                                            msg.ts
+                                          )
+                                        }}
                                         className="text-blue-500 text-sm hover:underline"
                                       >
                                         💬 댓글 {msg.reply_count}개 보기
                                       </button>
-                                      {console.log(expandedReplies[msg.id])}
-                                      {/* {expandedReplies[msg.id] && (
+                                      {console.log(expandedReplies)}
+                                      {expandedReplies && (
                                         <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
-                                          {msg.replies.map((r) => (
+                                          {msg.replies?.map((r) => (
                                             <div
-                                              key={r.id}
+                                              key={r.ts}
                                               className="text-sm text-gray-700"
                                             >
+                                              <span className="text-xs text-gray-500 mr-1">
+                                                {r.ts}
+                                              </span>
                                               🗨 {r.text}
                                             </div>
                                           ))}
                                         </div>
-                                      )} */}
+                                      )}
                                     </>
                                   )}
                               </div>
