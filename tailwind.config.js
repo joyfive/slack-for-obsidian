@@ -6,6 +6,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        kopub: ['"KoPub Batang"', "serif"],
+      },
       colors: {
         "legal-yellow": "#FFF9E6",
         "legal-line": "#E6E3B4", // legal yellow보다 조금 어두운 색

@@ -24,8 +24,8 @@ export default function Modal({ children, onClose }: ModalProps) {
     >
       <div
         className={`
-          bg-purple-50 rounded-xl shadow-xl overflow-auto
-          w-full h-full md:rounded-
+          bg-[#C9B798] shadow-color-[#A8926B] shadow-xl overflow-auto
+          w-full h-full rounded-none md:rounded-lg
           md:w-[70vw] md:h-[80vh]
           p-6
         `}

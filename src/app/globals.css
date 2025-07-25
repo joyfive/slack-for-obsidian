@@ -13,13 +13,16 @@
     --foreground: #ededed;
   }
 }
-
-body {
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@font-face {
+  font-family: "KoPub Batang";
+  src: url("https://cdn.jsdelivr.net/npm/font-kopub@1.0/kopubdotum.min.css")
+    format("woff2");
+  font-weight: normal;
+  font-style: normal;
 }
 html,
 body {
+  font-family: "KoPub Dotum", serif;
   margin: 0;
   padding: 0;
   height: 100%;

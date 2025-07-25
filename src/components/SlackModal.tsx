@@ -63,6 +63,33 @@ export default function SlackMessageModal({
     console.log("useEffect", date)
   }, [isOpen, date])
 
+  const colorThemes = [
+    {
+      groupBg: "bg-yellow-100",
+      groupBorder: "border border-yellow-200",
+      groupShadow: "shadow-color-yellow-200",
+      messageBg: "bg-yellow-50",
+    },
+    {
+      groupBg: "bg-cyan-100",
+      groupBorder: "border border-cyan-200",
+      groupShadow: "shadow-color-cyan-200",
+      messageBg: "bg-cyan-50",
+    },
+    {
+      groupBg: "bg-fuchsia-100",
+      groupBorder: "border border-fuchsia-200",
+      groupShadow: "shadow-color-fuchsia-200",
+      messageBg: "bg-fuchsia-50",
+    },
+    {
+      groupBg: "bg-emerald-100",
+      groupBorder: "border border-emerald-200",
+      groupShadow: "shadow-color-emerald-200",
+      messageBg: "bg-emerald-50",
+    },
+  ]
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
@@ -159,7 +186,7 @@ export default function SlackMessageModal({
 
   return (
     <Modal onClose={onClose}>
-      <div className="w-full h-full flex flex-col overflow-hidden">
+      <div className="w-full h-full flex flex-col overflow-hidden  bg-white p-6 rounded-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-[#111111]">{title}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
@@ -167,7 +194,7 @@ export default function SlackMessageModal({
           </button>
         </div>
 
-        <div className="flex items-center flex-shrink-0 mb-2 text-sm text-gray-700">
+        <div className="flex items-center flex-shrink-0 pb-4 text-sm text-gray-700">
           <Checkbox
             checked={selectedIds.length === allIds.length}
             onChange={toggleSelectAll}
@@ -176,115 +203,118 @@ export default function SlackMessageModal({
           전체 선택
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-          {channels.map((ch) => (
-            <div
-              key={ch.id}
-              className="border border-purple-100 rounded-md bg-white px-4 py-3 shadow-purple-100 shadow-sm"
-            >
-              {/* 채널 헤더 */}
-              <button
-                onClick={() => toggleChannel(ch.id, ch.name)}
-                className="flex items-center text-md font-medium text-gray-600 w-full"
+        <div className="flex-1 overflow-y-auto pr-2 rotate-1">
+          {channels.map((ch, index) => {
+            const theme = colorThemes[index % colorThemes.length]
+            return (
+              <div
+                key={ch.id}
+                className={`${theme.groupBg} ${theme.groupBorder} ${theme.groupShadow} shadow-sm px-3 py-3 hover:scale-95 active:scale-95 rotate-1 mt-[-6px]`}
               >
-                <div className="flex items-center justify-between w-full">
-                  <span># {ch.name}</span>
-                  {expanded === ch.id ? (
-                    <ChevronDown size={16} color="#777" className="mr-1" />
-                  ) : (
-                    <ChevronRight size={16} color="#777" className="mr-1" />
+                {/* 채널 헤더 */}
+                <button
+                  onClick={() => toggleChannel(ch.id, ch.name)}
+                  className="flex items-center text-md font-bold text-gray-600 w-full"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span># {ch.name}</span>
+                    {expanded === ch.id ? (
+                      <ChevronDown size={16} color="#777" className="mr-1" />
+                    ) : (
+                      <ChevronRight size={16} color="#777" className="mr-1" />
+                    )}
+                  </div>
+                  {messagesMap[ch.id]?.length > 0 && (
+                    <span className="ml-2 text-sm text-gray-400">
+                      ({messagesMap[ch.id].length})
+                    </span>
                   )}
-                </div>
-                {messagesMap[ch.id]?.length > 0 && (
-                  <span className="ml-2 text-sm text-gray-400">
-                    ({messagesMap[ch.id].length})
-                  </span>
-                )}
-              </button>
+                </button>
 
-              {/* 메시지 리스트 */}
-              {expanded === ch.id && (
-                <div className="mt-3 space-y-3">
-                  {loading && (
-                    <div className="text-sm text-gray-500">
-                      <Spinner size={16} />
-                    </div>
-                  )}
-                  {messagesMap[ch.id] && messagesMap[ch.id].length > 0 ? (
-                    messagesMap[ch.id].map(
-                      (msg) => (
-                        console.log("msg", msg),
-                        (
-                          <div
-                            key={msg.ts}
-                            className="border border-purple-200 rounded-sm p-3 bg-purple-50"
-                          >
-                            <div className="flex items-start gap-2">
-                              <Checkbox
-                                checked={selectedIds.includes(msg.ts)}
-                                onChange={() => toggleSelect(msg.ts)}
-                                className="mt-1"
-                              />
-                              <div>
-                                <div className="text-xs text-gray-500 mb-1">
-                                  {msg.ts}
-                                </div>
-                                <div className="text-sm text-gray-700 whitespace-pre-wrap mb-2">
-                                  {msg.text}
-                                </div>
+                {/* 메시지 리스트 */}
+                {expanded === ch.id && (
+                  <div className="mt-3 space-y-3">
+                    {loading && (
+                      <div className="text-sm text-gray-500">
+                        <Spinner size={16} />
+                      </div>
+                    )}
+                    {messagesMap[ch.id] && messagesMap[ch.id].length > 0 ? (
+                      messagesMap[ch.id].map(
+                        (msg) => (
+                          console.log("msg", msg),
+                          (
+                            <div
+                              key={msg.ts}
+                              className={`${theme.messageBg} rounded-sm p-3`}
+                            >
+                              <div className="flex items-start gap-2">
+                                <Checkbox
+                                  checked={selectedIds.includes(msg.ts)}
+                                  onChange={() => toggleSelect(msg.ts)}
+                                  className="mt-1"
+                                />
+                                <div>
+                                  <div className="text-xs text-gray-500 mb-1">
+                                    {msg.ts}
+                                  </div>
+                                  <div className="text-sm text-gray-700 whitespace-pre-wrap mb-2">
+                                    {msg.text}
+                                  </div>
 
-                                {msg.thread_ts !== null &&
-                                  msg.reply_count > 0 && (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          toggleReplies(
-                                            ch.id,
-                                            msg.thread_ts!,
-                                            msg.ts
-                                          )
-                                        }}
-                                        className="text-blue-500 text-sm hover:underline"
-                                      >
-                                        💬 댓글 {msg.reply_count}개 보기
-                                      </button>
-                                      {console.log(expandedReplies)}
-                                      {expandedReplies && (
-                                        <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
-                                          {msg.replies?.map((r) => (
-                                            <div
-                                              key={r.ts}
-                                              className="text-sm text-gray-700"
-                                            >
-                                              <span className="text-xs text-gray-500 mr-1">
-                                                {r.ts}
-                                              </span>
-                                              🗨 {r.text}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
+                                  {msg.thread_ts !== null &&
+                                    msg.reply_count > 0 && (
+                                      <>
+                                        <button
+                                          onClick={() => {
+                                            toggleReplies(
+                                              ch.id,
+                                              msg.thread_ts!,
+                                              msg.ts
+                                            )
+                                          }}
+                                          className="text-blue-500 text-sm hover:underline"
+                                        >
+                                          💬 댓글 {msg.reply_count}개 보기
+                                        </button>
+                                        {console.log(expandedReplies)}
+                                        {expandedReplies && (
+                                          <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
+                                            {msg.replies?.map((r) => (
+                                              <div
+                                                key={r.ts}
+                                                className="text-sm text-gray-700"
+                                              >
+                                                <span className="text-xs text-gray-500 mr-1">
+                                                  {r.ts}
+                                                </span>
+                                                🗨 {r.text}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          )
                         )
                       )
-                    )
-                  ) : (
-                    <div className="text-sm text-gray-400 ">
-                      추출할 메시지가 없습니다
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                    ) : (
+                      <div className="text-sm text-gray-400 ">
+                        추출할 메시지가 없습니다
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
 
         <div className="flex items-center justify-between mt-4 border-t pt-4">
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-gray-500">
             ({selectedIds.length}개 선택됨)
           </span>
           <div className="flex gap-2">

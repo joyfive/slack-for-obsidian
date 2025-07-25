@@ -16,13 +16,13 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyle =
-    "bg-[#C9B798] text-white font-medium px-6 py-3 rounded-md shadow-lg shadow-color-[#A8926B] hover:scale-105 transition"
+    "font-bold px-6 py-3 rounded-md shadow-lg shadow-color-[#A8926B] hover:scale-105 transition"
 
   const variantStyles = {
-    primary: "hover:opacity-90",
+    primary: "hover:opacity-90 text-white bg-[#C9B798]",
     "gray-fill": "bg-[#f2f2f2] text-[#555555] hover:bg-[#e6e6e6]",
     "gray-outline":
-      "border border-[#d9d9d9] text-[#555555] bg-white hover:bg-[#f9f9f9]",
+      "border border-[#C9B798] bg-white text-[#A8926B] hover:bg-[#f9f9f9]",
   }
 
   const spinner = (

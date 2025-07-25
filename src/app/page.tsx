@@ -63,16 +63,16 @@ export default function HomePage() {
       <div className="bg-legal-yellow bg-legal-pad min-h-screen px-6 py-16 flex flex-col justify-between">
         <div className="mt-8 max-w-2xl mx-auto">
           <h1 className="text-2xl font-bold text-[#111111] mb-2">
-            오늘의 기쁨, 내일의 기쁨으로
+            오늘의 Slip, 내일의 기록으로
           </h1>
-          <p className="text-sm text-[#555555] mb-8">
-            슬랙에 흘러쓴 메시지를 옵시디언에 남겨두세요. 오늘의 기억을 모아,
-            나만의 기록으로 아카이빙합니다.
+          <p className="mt-1 leading-7 text-md text-[#555555] mb-8">
+            슬랙에 흘려쓴 메시지를 옵시디언에 남겨두세요. <br />
+            오늘의 기억을 모아, 나만의 기록으로 아카이빙합니다.
           </p>
 
-          <section className="py-2 space-y-6">
-            <div>
-              <h2 className="text-sm font-medium text-[#555555] mb-2">
+          <section className="py-4 space-y-6">
+            <div className="mt-6 mb-11">
+              <h2 className="text-sm font-bold text-[#555555] mb-4">
                 오늘의 기록
               </h2>
               <Button className="w-full py-3" onClick={todayOpen}>
@@ -81,7 +81,7 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h2 className="text-sm font-medium text-[#555555] mb-2 ">
+              <h2 className="text-sm font-bold text-[#555555] mb-2 ">
                 구간 기록
               </h2>
               <div className="flex items-center gap-2 mb-2">
