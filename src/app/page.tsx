@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/button"
 import Spinner from "@/components/spinner"
 import SlackModal from "@/components/SlackModal"
-const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD`
 
 export default function HomePage() {
   const router = useRouter()
@@ -55,13 +55,13 @@ export default function HomePage() {
   }
 
   if (!isAuthenticated)
-    <div className="min-h-screen bg-[#f3f1fa] flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-[#f3f1fa] flex flex-col items-center justify-center p-8">
       <Spinner size={48}></Spinner>
     </div>
   else
     return (
-      <div className="min-h-screen bg-[#f6f4fc] px-6 py-12 flex flex-col justify-between">
-        <div className="max-w-2xl mx-auto">
+      <div className="bg-legal-yellow bg-legal-pad min-h-screen px-6 py-16 flex flex-col justify-between">
+        <div className="mt-8 max-w-2xl mx-auto">
           <h1 className="text-2xl font-bold text-[#111111] mb-2">
             오늘의 기쁨, 내일의 기쁨으로
           </h1>
@@ -70,15 +70,12 @@ export default function HomePage() {
             나만의 기록으로 아카이빙합니다.
           </p>
 
-          <section className="space-y-6">
+          <section className="py-2 space-y-6">
             <div>
               <h2 className="text-sm font-medium text-[#555555] mb-2">
                 오늘의 기록
               </h2>
-              <Button
-                className="w-full py-3 rounded-lg text-white font-medium bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6]"
-                onClick={todayOpen}
-              >
+              <Button className="w-full py-3" onClick={todayOpen}>
                 오늘의 기록 보기
               </Button>
             </div>
@@ -96,7 +93,7 @@ export default function HomePage() {
                     })
                   }
                   type="date"
-                  className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
+                  className="flex-1 border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
                 />
                 <span className="text-[#999999]">~</span>
                 <input
@@ -107,13 +104,10 @@ export default function HomePage() {
                     })
                   }
                   type="date"
-                  className="flex-1 rounded-md border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
+                  className="flex-1 border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
                 />
               </div>
-              <Button
-                className="w-full py-3 rounded-lg text-white font-medium bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6]"
-                onClick={periodOpen}
-              >
+              <Button className="w-full py-3" onClick={periodOpen}>
                 구간 기록 보기
               </Button>
             </div>

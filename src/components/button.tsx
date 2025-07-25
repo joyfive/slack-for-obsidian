@@ -16,11 +16,10 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyle =
-    "inline-flex items-center justify-center px-4 py-3 text-sm font-medium rounded-lg transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+    "bg-[#C9B798] text-white font-medium px-6 py-3 rounded-md shadow-lg shadow-color-[#A8926B] hover:scale-105 transition"
 
   const variantStyles = {
-    primary:
-      "bg-gradient-to-r from-[#9C7FFF] to-[#7C4DFF] text-white hover:opacity-90",
+    primary: "hover:opacity-90",
     "gray-fill": "bg-[#f2f2f2] text-[#555555] hover:bg-[#e6e6e6]",
     "gray-outline":
       "border border-[#d9d9d9] text-[#555555] bg-white hover:bg-[#f9f9f9]",
