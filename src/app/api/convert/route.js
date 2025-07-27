@@ -1,55 +1,45 @@
-// /app/api/convert/route.js (Next.js 13+)
+// /api/convert/route.js
 import { NextResponse } from "next/server"
 
-export async function POST(request) {
-  const { url } = await request.json()
+export async function POST(req) {
+  try {
+    const { messages } = await req.json()
 
-  if (!url) {
-    return NextResponse.json({ error: "No URL" }, { status: 400 })
-  }
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json(
+        { ok: false, message: "메시지 목록이 비어있습니다." },
+        { status: 400 }
+      )
+    }
 
-  // 1. URL 파싱(channel, ts 추출) - 정규식 활용
-  // 예시: https://xxx.slack.com/archives/CHANNEL_ID/p1234567890123456
-  const match = url.match(/archives\/([^/]+)\/p(\d{16})/)
-  if (!match) {
-    return NextResponse.json({ error: "Invalid URL" }, { status: 400 })
-  }
-  const channel = match[1]
-  const ts = match[2].replace(/^(\d{10})(\d{6})$/, "$1.$2")
-  const SLACK_TOKEN = process.env.SLACK_TOKEN
+    let markdown = ""
 
-  // 2. 슬랙 API 호출 (SLACK_TOKEN 환경변수 필요)
-  if (!SLACK_TOKEN) {
-    return NextResponse.json({ error: "No Slack token" }, { status: 500 })
-  }
+    messages.forEach((msg) => {
+      markdown += `## [#${msg.channel}] - ${msg.ts}\n`
+      markdown += `> ${msg.text}\n`
 
-  // 3. fetch replies (스레드 전체 메시지)
-  const resp = await fetch(
-    `https://slack.com/api/conversations.replies?channel=${channel}&ts=${ts}`,
-    { headers: { Authorization: `Bearer ${SLACK_TOKEN}` } }
-  )
-  const data = await resp.json()
-  console.log("Slack API response:", data)
-  if (!data.ok) {
-    return NextResponse.json({ error: "Slack API error" }, { status: 500 })
-  }
+      if (Array.isArray(msg.replies) && msg.replies.length > 0) {
+        msg.replies.forEach((reply) => {
+          markdown += `\n>> ${reply.ts} - ${reply.text}`
+        })
+        markdown += `\n`
+      }
 
-  // 4. Markdown 변환 (아주 단순 포맷 예시)
-  const md = data.messages
-    .map(
-      (msg) =>
-        `- **${msg.user || msg.username}** [${new Date(
-          Number(msg.ts.split(".")[0]) * 1000
-        ).toLocaleString()}]\n\n${msg.text}\n`
+      markdown += `\n---\n\n`
+    })
+
+    return new Response(markdown, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Content-Disposition": `attachment; filename="slip-${Date.now()}.md"`,
+      },
+    })
+  } catch (err) {
+    console.error("Markdown 변환 오류:", err)
+    return NextResponse.json(
+      { ok: false, error: "마크다운 변환 중 오류가 발생했습니다." },
+      { status: 500 }
     )
-    .join("\n---\n")
-
-  // 5. 파일로 응답
-  return new Response(md, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/markdown; charset=utf-8",
-      "Content-Disposition": `attachment; filename="slack_archive.md"`,
-    },
-  })
+  }
 }

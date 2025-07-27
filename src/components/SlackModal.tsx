@@ -8,6 +8,7 @@ import Modal from "@/components/Modal"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import Spinner from "./spinner"
 import clsx from "clsx"
+import { toast } from "sonner"
 
 interface Message {
   id: string
@@ -90,6 +91,54 @@ export default function SlackMessageModal({
       messageBg: "bg-emerald-50",
     },
   ]
+
+  const handleExportClick = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("내보낼 메시지를 선택해주세요.")
+      return
+    }
+
+    const selectedMessages = []
+
+    for (const [channelId, messages] of Object.entries(messagesMap)) {
+      for (const msg of messages) {
+        if (selectedIds.includes(msg.ts)) {
+          selectedMessages.push({
+            channel: channelId,
+            ts: msg.ts,
+            text: msg.text,
+            replies: msg.replies || [],
+          })
+        }
+      }
+    }
+
+    try {
+      const res = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: selectedMessages }),
+      })
+
+      if (!res.ok) {
+        toast.error("Markdown 추출에 실패했어요.")
+        return
+      }
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `slip-${new Date().toISOString().slice(0, 10)}.md`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success(".md 파일이 저장되었어요!")
+    } catch (err) {
+      console.error("다운로드 오류:", err)
+      toast.error("다운로드 중 오류가 발생했어요.")
+    }
+  }
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -327,10 +376,10 @@ export default function SlackMessageModal({
             </Button>
             <Button
               variant="primary"
-              onClick={() => console.log("Export selected", selectedIds)}
+              onClick={handleExportClick}
               className="w-full"
             >
-              .md로 추출
+              기록하기
             </Button>
           </div>
         </div>
