@@ -7,6 +7,7 @@ import Checkbox from "@/components/checkbox"
 import Modal from "@/components/Modal"
 import { ChevronDown, ChevronRight } from "lucide-react"
 import Spinner from "./spinner"
+import clsx from "clsx"
 
 interface Message {
   id: string
@@ -32,7 +33,7 @@ export default function SlackMessageModal({
   date = { startDate: "", endDate: "" },
 }: SlackMessageModalProps) {
   const [channels, setChannels] = useState([{ id: "", name: "" }])
-  const [expanded, setExpanded] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState<string[]>([])
   const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>({})
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [expandedReplies, setExpandedReplies] = useState<string | null>(null)
@@ -102,7 +103,7 @@ export default function SlackMessageModal({
     msgTs: string
   ) => {
     // 이미 열린 댓글이라면 닫기
-    if (expanded === msgThreadTs) {
+    if (expanded.includes(msgThreadTs)) {
       setExpandedReplies(null)
       return
     }
@@ -147,16 +148,14 @@ export default function SlackMessageModal({
     setExpandedReplies(msgThreadTs)
   }
   const toggleChannel = async (channelId: string, channelName: string) => {
-    console.log("toggleChannel", channelId, channelName)
-    // 이미 열린 채널이라면 닫기
-    if (expanded === channelId) {
-      setExpanded(null)
-      return
-    }
+    setExpanded(
+      (prev) =>
+        prev.includes(channelId)
+          ? prev.filter((id) => id !== channelId) // 이미 열려있으면 제거
+          : [...prev, channelId] // 아니면 추가
+    )
 
-    // 채널 확장
-    setExpanded(channelId)
-
+    console.log("토글채널", expanded, channelId, expanded.includes(channelId))
     // 이미 메시지를 불러온 적이 있다면 API 호출 생략
     if (!messagesMap[channelId]) {
       try {
@@ -186,7 +185,7 @@ export default function SlackMessageModal({
 
   return (
     <Modal onClose={onClose}>
-      <div className="w-full h-full flex flex-col overflow-hidden  bg-white p-6 rounded-md">
+      <div className="w-full h-full flex flex-col overflow-hidden  bg-white py-6 px-4 md:p-6 rounded-md">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-[#111111]">{title}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
@@ -194,31 +193,39 @@ export default function SlackMessageModal({
           </button>
         </div>
 
-        <div className="flex items-center flex-shrink-0 pb-4 text-sm text-gray-700">
-          <Checkbox
-            checked={selectedIds.length === allIds.length}
-            onChange={toggleSelectAll}
-            className="mr-2"
-          />
-          전체 선택
+        <div className="flex items-center justify-between  flex-shrink-0 pb-4 text-sm text-gray-700">
+          <div className="flex">
+            <Checkbox
+              checked={selectedIds.length === allIds.length}
+              onChange={toggleSelectAll}
+              className="mr-2"
+            />
+            전체 선택
+          </div>
+          <p className="text-sm text-gray-500">
+            ({selectedIds.length}개 선택됨)
+          </p>
         </div>
-
         <div className="flex-1 overflow-y-auto pr-2 rotate-1">
           {channels.map((ch, index) => {
             const theme = colorThemes[index % colorThemes.length]
             return (
               <div
                 key={ch.id}
-                className={`${theme.groupBg} ${theme.groupBorder} ${theme.groupShadow} shadow-sm px-3 py-3 hover:scale-95 active:scale-95 rotate-1 mt-[-6px]`}
+                className={clsx(
+                  `${theme.groupBg} ${theme.groupShadow} shadow-sm px-3 py-3 rotate-1 mt-[-6px]`,
+                  expanded!.includes(ch.id)
+                    ? `${theme.groupBorder}`
+                    : "hover:scale-95 active:scale-95"
+                )}
               >
-                {/* 채널 헤더 */}
                 <button
                   onClick={() => toggleChannel(ch.id, ch.name)}
                   className="flex items-center text-md font-bold text-gray-600 w-full"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span># {ch.name}</span>
-                    {expanded === ch.id ? (
+                    {expanded.includes(ch.id) ? (
                       <ChevronDown size={16} color="#777" className="mr-1" />
                     ) : (
                       <ChevronRight size={16} color="#777" className="mr-1" />
@@ -232,7 +239,7 @@ export default function SlackMessageModal({
                 </button>
 
                 {/* 메시지 리스트 */}
-                {expanded === ch.id && (
+                {expanded.includes(ch.id) && (
                   <div className="mt-3 space-y-3">
                     {loading && (
                       <div className="text-sm text-gray-500">
@@ -313,17 +320,15 @@ export default function SlackMessageModal({
           })}
         </div>
 
-        <div className="flex items-center justify-between mt-4 border-t pt-4">
-          <span className="text-sm text-gray-500">
-            ({selectedIds.length}개 선택됨)
-          </span>
-          <div className="flex gap-2">
-            <Button variant="gray-outline" onClick={onClose}>
+        <div className="flex items-center justify-between mt-4 border-t pt-4 w-full ">
+          <div className="flex gap-2 w-full">
+            <Button variant="gray-outline" onClick={onClose} className="w-full">
               그만보기
             </Button>
             <Button
               variant="primary"
               onClick={() => console.log("Export selected", selectedIds)}
+              className="w-full"
             >
               .md로 추출
             </Button>
