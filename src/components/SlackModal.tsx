@@ -244,7 +244,9 @@ export default function SlackMessageModal({
     <Modal onClose={onClose}>
       <div className="w-full h-full flex flex-col overflow-hidden  bg-white p-6 md:rounded-md rounded-none rounded-t-3xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-[#111111]">{title}</h2>
+          <h2 className="text-lg font-serif font-bold text-[#111111]">
+            {title}
+          </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
             ✕
           </button>
@@ -280,7 +282,7 @@ export default function SlackMessageModal({
                   onClick={() => toggleChannel(ch.id, ch.name)}
                   className="flex items-center justify-between text-base font-bold text-gray-700 w-full"
                 >
-                  <span># {ch.name}</span>
+                  <span className="font-serif font-regular"># {ch.name}</span>
                   <div className="flex items-center gap-1">
                     {messagesMap[ch.id]?.length > 0 && (
                       <span className="ml-2 text-sm font-medium text-gray-400">

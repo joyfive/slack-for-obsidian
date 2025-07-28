@@ -7,7 +7,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        kopub: ['"KoPub Batang"', "serif"],
+        sans: ['"KoPubWorld Dotum"', '"Pretendard"', "sans-serif"],
+        serif: ['"KoPubWorld Batang"', "serif"],
       },
       colors: {
         "legal-yellow": "#FFF9E6",
