@@ -20,6 +20,81 @@
   font-weight: normal;
   font-style: normal;
 }
+@layer utilities {
+  .clip-note-corner {
+    clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%);
+  }
+  .fold-note-yellow {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+    position: relative;
+  }
+
+  .fold-note-yellow::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 24px solid #fef08a;
+    border-top: 24px solid #fef9c3; /* 노란 포스트잇 한 톤 진한 색상 */
+    z-index: 0;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .fold-note-cyan {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+    position: relative;
+  }
+
+  .fold-note-cyan::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 24px solid #a5f3fc;
+    border-top: 24px solid #cffafe; /* 파란 포스트잇 한 톤 진한 색상 */
+    z-index: 0;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  }
+  .fold-note-fuchsia {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+    position: relative;
+  }
+
+  .fold-note-fuchsia::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 24px solid #f5d0fe;
+    border-top: 24px solid #fae8ff; /* 핑크 포스트잇 한 톤 진한 색상 */
+    z-index: 0;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  }
+  .fold-note-emerald {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+    position: relative;
+  }
+
+  .fold-note-emerald::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-left: 24px solid #a7f3d0;
+    border-top: 24px solid #d1fae5; /* 에메랄드 포스트잇 한 톤 진한 색상 */
+    z-index: 0;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.1));
+  }
+}
+
 html,
 body {
   font-family: "KoPub Dotum", serif;

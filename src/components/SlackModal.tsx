@@ -69,26 +69,34 @@ export default function SlackMessageModal({
     {
       groupBg: "bg-yellow-100",
       groupBorder: "border border-yellow-200",
-      groupShadow: "shadow-color-yellow-200",
+      groupShadow: "shadow-yellow-200 shadow-md",
+      messageShadow: "shadow-yellow-100 shadow-md",
       messageBg: "bg-yellow-50",
+      cornerColor: "fold-note-yellow",
     },
     {
       groupBg: "bg-cyan-100",
       groupBorder: "border border-cyan-200",
-      groupShadow: "shadow-color-cyan-200",
+      groupShadow: "shadow-cyan-200 shadow-md",
+      messageShadow: "shadow-cyan-100 shadow-md",
       messageBg: "bg-cyan-50",
+      cornerColor: "fold-note-cyan",
     },
     {
       groupBg: "bg-fuchsia-100",
       groupBorder: "border border-fuchsia-200",
-      groupShadow: "shadow-color-fuchsia-200",
+      groupShadow: "shadow-fuchsia-200 shadow-md",
+      lightShadow: "shadow-fuchsia-100 shadow-md",
       messageBg: "bg-fuchsia-50",
+      cornerColor: "fold-note-fuchsia",
     },
     {
       groupBg: "bg-emerald-100",
       groupBorder: "border border-emerald-200",
-      groupShadow: "shadow-color-emerald-200",
+      groupShadow: "shadow-emerald-200 shadow-md",
+      messageShadow: "shadow-emerald-100 shadow-md",
       messageBg: "bg-emerald-50",
+      cornerColor: "fold-note-emerald",
     },
   ]
 
@@ -234,7 +242,7 @@ export default function SlackMessageModal({
 
   return (
     <Modal onClose={onClose}>
-      <div className="w-full h-full flex flex-col overflow-hidden  bg-white py-6 px-4 md:p-6 rounded-md">
+      <div className="w-full h-full flex flex-col overflow-hidden  bg-white p-6 md:rounded-md rounded-none rounded-t-3xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-[#111111]">{title}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
@@ -255,41 +263,41 @@ export default function SlackMessageModal({
             ({selectedIds.length}개 선택됨)
           </p>
         </div>
-        <div className="flex-1 overflow-y-auto pr-2 rotate-1">
+        <div className="flex-1 overflow-y-auto pr-2">
           {channels.map((ch, index) => {
             const theme = colorThemes[index % colorThemes.length]
             return (
               <div
                 key={ch.id}
                 className={clsx(
-                  `${theme.groupBg} ${theme.groupShadow} shadow-sm px-3 py-3 rotate-1 mt-[-6px]`,
+                  `${theme.groupBg} px-3 py-3 rounded-lg transition-all duration-200 ease-in-out`,
                   expanded!.includes(ch.id)
-                    ? `${theme.groupBorder}`
-                    : "hover:scale-95 active:scale-95"
+                    ? `rotate-0 my-2 ${theme.groupBorder} ${theme.lightShadow} `
+                    : `hover:scale-95 active:scale-95 rotate-1 mt-[-4px] ${theme.groupShadow}`
                 )}
               >
                 <button
                   onClick={() => toggleChannel(ch.id, ch.name)}
-                  className="flex items-center text-md font-bold text-gray-600 w-full"
+                  className="flex items-center justify-between text-base font-bold text-gray-700 w-full"
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span># {ch.name}</span>
+                  <span># {ch.name}</span>
+                  <div className="flex items-center gap-1">
+                    {messagesMap[ch.id]?.length > 0 && (
+                      <span className="ml-2 text-sm font-medium text-gray-400">
+                        ({messagesMap[ch.id].length})
+                      </span>
+                    )}
                     {expanded.includes(ch.id) ? (
                       <ChevronDown size={16} color="#777" className="mr-1" />
                     ) : (
                       <ChevronRight size={16} color="#777" className="mr-1" />
                     )}
                   </div>
-                  {messagesMap[ch.id]?.length > 0 && (
-                    <span className="ml-2 text-sm text-gray-400">
-                      ({messagesMap[ch.id].length})
-                    </span>
-                  )}
                 </button>
 
                 {/* 메시지 리스트 */}
                 {expanded.includes(ch.id) && (
-                  <div className="mt-3 space-y-3">
+                  <div className="mt-3 space-y-2">
                     {loading && (
                       <div className="text-sm text-gray-500">
                         <Spinner size={16} />
@@ -302,7 +310,7 @@ export default function SlackMessageModal({
                           (
                             <div
                               key={msg.ts}
-                              className={`${theme.messageBg} rounded-sm p-3`}
+                              className={`${theme.messageBg} ${theme.cornerColor} ${theme.groupBorder} ${theme.groupShadow} rounded-md p-3`}
                             >
                               <div className="flex items-start gap-2">
                                 <Checkbox

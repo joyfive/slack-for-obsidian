@@ -27,7 +27,7 @@ export default function Modal({ children, onClose }: ModalProps) {
           bg-[#C9B798] shadow-color-[#A8926B] shadow-xl overflow-auto
           w-full h-full rounded-none md:rounded-lg
           md:w-[70vw] md:h-[80vh]
-          p-6
+          md:p-6 p-0 pt-6
         `}
         onClick={(e) => e.stopPropagation()}
       >
