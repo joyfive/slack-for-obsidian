@@ -12,9 +12,7 @@ function formatSlackTimestamp(ts) {
     console.warn("Invalid timestamp:", ts)
     return null
   }
-  console.log(ts)
   const [secondsStr, microStr] = ts?.split(".")
-  console.log(secondsStr, microStr)
   const timestampMs =
     parseInt(secondsStr) * 1000 + Math.floor(parseInt(microStr) / 1000) // 밀리초 단위로 변환
   const date = new Date(timestampMs)
@@ -55,7 +53,6 @@ export async function GET(req) {
     const channelId = searchParams.get("channelId")
     const channelName = searchParams.get("channelName")
     const { oldest, latest } = getDateRange(startDate, endDate)
-    console.log(startDate, endDate, oldest, latest, channelId, channelName)
     const messagesRes = await fetch(
       `${SLACK_API_BASE}/conversations.history?channel=${channelId}&oldest=${oldest}&latest=${latest}&inclusive=true`,
       {
@@ -63,19 +60,20 @@ export async function GET(req) {
       }
     )
     const messagesData = await messagesRes.json()
-    console.log("messagesData", messagesData.messages)
+    console.log("메시지 데이터 원본", messagesData.messages)
     const results = []
     if (messagesData.ok && Array.isArray(messagesData.messages)) {
-      const formattedMessages = messagesData.messages.map((msg) => ({
+      const userMessages = messagesData.messages.filter(
+        (msg) => !msg.subtype // subtype 있으면 시스템 메시지로 간주
+      )
+      const formattedMessages = userMessages.map((msg) => ({
         text: msg.text,
         ts: formatSlackTimestamp(msg.ts),
         thread_ts: msg.thread_ts || null,
         reply_count: msg.reply_count || 0,
       }))
-      console.log("formattedMessages", formattedMessages)
       results.push(...formattedMessages)
-      console.log("results:", results)
-      console.log(`채널 ${channelName} 메시지 처리 성공`, results)
+      console.log(`채널 ${channelName} 메시지 처리 성공`, { results })
       return NextResponse.json({ ok: true, results }, { status: 200 })
     } else {
       console.warn(`채널 ${channelName} 메시지 처리 실패`, messagesData)

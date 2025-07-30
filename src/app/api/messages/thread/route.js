@@ -7,9 +7,7 @@ function formatSlackTimestamp(ts) {
     console.warn("Invalid timestamp:", ts)
     return null
   }
-  console.log(ts)
   const [secondsStr, microStr] = ts?.split(".")
-  console.log(secondsStr, microStr)
   const timestampMs =
     parseInt(secondsStr) * 1000 + Math.floor(parseInt(microStr) / 1000) // 밀리초 단위로 변환
   const date = new Date(timestampMs)
@@ -36,7 +34,6 @@ export async function GET(req) {
         { status: 400 }
       )
     }
-    console.log("채널:", channel, "타임스탬프:", ts)
     // ✅ 댓글 요청
     const repliesRes = await fetch(
       `${SLACK_API_BASE}/conversations.replies?channel=${channel}&ts=${ts}&limit=10`,
@@ -52,7 +49,7 @@ export async function GET(req) {
     }
 
     const repliesData = await repliesRes.json()
-
+    console.log("댓글 데이터:", repliesData)
     if (!repliesData.ok || !repliesData.messages) {
       console.warn("슬랙 API 응답 오류:", repliesData)
       return NextResponse.json(
