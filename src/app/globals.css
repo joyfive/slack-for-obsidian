@@ -99,3 +99,24 @@ body {
   padding: 0;
   height: 100%;
 }
+
+h1 {
+  font-family: "KoPub Batang", serif;
+  font-weight: bold;
+  font-size: 2rem;
+  color: var(--foreground);
+}
+
+h2 {
+  font-family: "KoPub Batang", serif;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: var(--foreground);
+}
+
+h3 {
+  font-family: "KoPub Batang", serif;
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: var(--foreground);
+}

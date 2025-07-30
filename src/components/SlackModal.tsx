@@ -23,14 +23,14 @@ interface Message {
 interface SlackMessageModalProps {
   isOpen: boolean
   onClose: () => void
-  title: string
+  title: { text: string; date: string }
   date?: { startDate: string; endDate: string }
 }
 
 export default function SlackMessageModal({
   isOpen,
   onClose,
-  title,
+  title = { text: "", date: "" },
   date = { startDate: "", endDate: "" },
 }: SlackMessageModalProps) {
   const [channels, setChannels] = useState([{ id: "", name: "" }])
@@ -245,7 +245,8 @@ export default function SlackMessageModal({
       <div className="w-full h-full flex flex-col overflow-hidden  bg-white p-6 md:rounded-md rounded-none rounded-t-3xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-serif font-bold text-[#111111]">
-            {title}
+            {title.text}
+            <span className="ml-2 text-sm text-gray-500">{title.date}</span>
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black">
             ✕

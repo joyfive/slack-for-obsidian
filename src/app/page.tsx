@@ -13,8 +13,9 @@ export default function HomePage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [title, setTitle] = useState("오늘의 기록")
+  const [title, setTitle] = useState({ text: "오늘의 기록", date: today })
   const [date, setDate] = useState({ startDate: "", endDate: today })
+  const [err, setErr] = useState("")
 
   useEffect(() => {
     fetch("/api/auth", {
@@ -43,14 +44,28 @@ export default function HomePage() {
   }, [router])
 
   const todayOpen = () => {
-    setTitle("오늘의 기록[" + date.endDate + "]")
+    setTitle({ text: "오늘의 기록", date: today })
     setDate({ startDate: "", endDate: today })
     setIsOpen(true)
   }
 
   const periodOpen = () => {
-    setTitle("구간 기록[" + date.startDate + " ~ " + date.endDate + "]")
+    setTitle({ text: "오늘의 기록", date: date.startDate + "~" + date.endDate })
     setDate({ startDate: date.startDate, endDate: date.endDate })
+    if (!date.startDate || !date.endDate) {
+      setErr("시작일과 종료일을 모두 선택해주세요.")
+      return
+    }
+    if (new Date(date.startDate) > new Date(date.endDate)) {
+      setErr("시작일은 종료일보다 이전이어야 합니다.")
+      return
+    }
+
+    if (date.endDate > today) {
+      setErr("종료일이 오늘 이후일 수 없습니다.")
+      return
+    }
+    setErr("")
     setIsOpen(true)
   }
 
@@ -97,6 +112,7 @@ export default function HomePage() {
                 />
                 <span className="text-[#999999]">~</span>
                 <input
+                  defaultValue={today}
                   onChange={(e) =>
                     setDate({
                       startDate: date.startDate,
@@ -107,7 +123,12 @@ export default function HomePage() {
                   className="flex-1 border border-[#ececec] bg-white px-3 py-2 text-sm text-[#999999]"
                 />
               </div>
-              <Button className="w-full py-3" onClick={periodOpen}>
+              {err && (
+                <div className="absolute text-red-500 text-xs mt-[-4px] ml-3">
+                  {err}
+                </div>
+              )}
+              <Button className="mt-4 w-full py-3" onClick={periodOpen}>
                 구간 기록 보기
               </Button>
             </div>
