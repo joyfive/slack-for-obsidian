@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-
+import { formatMsgText } from "@/utils/formatMessageText"
 const SLACK_TOKEN = process.env.SLACK_TOKEN
 const SLACK_API_BASE = "https://slack.com/api"
 
@@ -67,7 +67,7 @@ export async function GET(req) {
         (msg) => !msg.subtype // subtype 있으면 시스템 메시지로 간주
       )
       const formattedMessages = userMessages.map((msg) => ({
-        text: msg.text,
+        text: formatMsgText(msg.text),
         ts: formatSlackTimestamp(msg.ts),
         thread_ts: msg.thread_ts || null,
         reply_count: msg.reply_count || 0,

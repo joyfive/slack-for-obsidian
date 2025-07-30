@@ -350,7 +350,7 @@ export default function SlackMessageModal({
                                             {msg.replies?.map((r) => (
                                               <div
                                                 key={r.ts}
-                                                className="text-sm text-gray-700"
+                                                className="text-sm text-gray-700 whitespace-pre-wrap"
                                               >
                                                 <span className="text-xs text-gray-500 mr-1">
                                                   {r.ts}

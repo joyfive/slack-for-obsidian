@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-
+import { formatMsgText } from "@/utils/formatMessageText"
 const SLACK_TOKEN = process.env.SLACK_TOKEN
 const SLACK_API_BASE = "https://slack.com/api"
 function formatSlackTimestamp(ts) {
@@ -59,7 +59,7 @@ export async function GET(req) {
     }
 
     const replies = repliesData.messages.slice(1).map((msg) => ({
-      text: msg.text,
+      text: formatMsgText(msg.text),
       ts: formatSlackTimestamp(msg.ts),
       thread_ts: msg.thread_ts,
     }))
