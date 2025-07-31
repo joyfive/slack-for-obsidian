@@ -73,6 +73,8 @@ export default function SlackMessageModal({
       messageShadow: "shadow-yellow-100 shadow-md",
       messageBg: "bg-yellow-50",
       cornerColor: "fold-note-yellow",
+      tapeBg: "bg-fuchsia-300 bg-opacity-50",
+      tapeCorner: "fold-note-fuchsia",
     },
     {
       groupBg: "bg-cyan-100",
@@ -81,6 +83,8 @@ export default function SlackMessageModal({
       messageShadow: "shadow-cyan-100 shadow-md",
       messageBg: "bg-cyan-50",
       cornerColor: "fold-note-cyan",
+      tapeBg: "bg-emerald-300 bg-opacity-50",
+      tapeCorner: "fold-note-emerald",
     },
     {
       groupBg: "bg-fuchsia-100",
@@ -89,6 +93,8 @@ export default function SlackMessageModal({
       lightShadow: "shadow-fuchsia-100 shadow-md",
       messageBg: "bg-fuchsia-50",
       cornerColor: "fold-note-fuchsia",
+      tapeBg: "bg-yellow-300 bg-opacity-50",
+      tapeCorner: "fold-note-yellow",
     },
     {
       groupBg: "bg-emerald-100",
@@ -97,6 +103,8 @@ export default function SlackMessageModal({
       messageShadow: "shadow-emerald-100 shadow-md",
       messageBg: "bg-emerald-50",
       cornerColor: "fold-note-emerald",
+      tapeBg: "bg-cyan-300 bg-opacity-50",
+      tapeCorner: "fold-note-cyan",
     },
   ]
 
@@ -311,59 +319,65 @@ export default function SlackMessageModal({
                         (msg) => (
                           console.log("msg", msg),
                           (
-                            <div
-                              key={msg.ts}
-                              className={`${theme.messageBg} ${theme.cornerColor} ${theme.groupBorder} ${theme.groupShadow} rounded-md p-3`}
-                            >
-                              <div className="flex items-start gap-2">
-                                <Checkbox
-                                  checked={selectedIds.includes(msg.ts)}
-                                  onChange={() => toggleSelect(msg.ts)}
-                                  className="mt-1"
-                                />
-                                <div>
-                                  <div className="text-xs text-gray-500 mb-1">
-                                    {msg.ts}
-                                  </div>
-                                  <div className="text-sm text-gray-700 whitespace-pre-wrap mb-2">
-                                    {msg.text}
-                                  </div>
+                            <div>
+                              <div
+                                key={msg.ts}
+                                className={`${theme.messageBg} ${theme.cornerColor} ${theme.groupBorder} ${theme.groupShadow} rounded-md p-3`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <Checkbox
+                                    checked={selectedIds.includes(msg.ts)}
+                                    onChange={() => toggleSelect(msg.ts)}
+                                    className="mt-1"
+                                  />
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">
+                                      {msg.ts}
+                                    </div>
+                                    <div className="text-sm text-gray-700 whitespace-pre-wrap mb-2">
+                                      {msg.text}
+                                    </div>
 
-                                  {msg.thread_ts !== null &&
-                                    msg.reply_count > 0 && (
-                                      <>
-                                        <button
-                                          onClick={() => {
-                                            toggleReplies(
-                                              ch.id,
-                                              msg.thread_ts!,
-                                              msg.ts
-                                            )
-                                          }}
-                                          className="text-blue-500 text-sm hover:underline"
-                                        >
-                                          💬 댓글 {msg.reply_count}개 보기
-                                        </button>
-                                        {console.log(expandedReplies)}
-                                        {expandedReplies && (
-                                          <div className="mt-2 pl-4 border-l border-gray-300 space-y-1">
-                                            {msg.replies?.map((r) => (
-                                              <div
-                                                key={r.ts}
-                                                className="text-sm text-gray-700 whitespace-pre-wrap"
-                                              >
-                                                <span className="text-xs text-gray-500 mr-1">
-                                                  {r.ts}
-                                                </span>
-                                                🗨 {r.text}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </>
-                                    )}
+                                    {msg.thread_ts !== null &&
+                                      msg.reply_count > 0 && (
+                                        <>
+                                          <button
+                                            onClick={() => {
+                                              toggleReplies(
+                                                ch.id,
+                                                msg.thread_ts!,
+                                                msg.ts
+                                              )
+                                            }}
+                                            className="text-blue-500 text-sm hover:underline"
+                                          >
+                                            💬 댓글 {msg.reply_count}개 보기
+                                          </button>
+                                        </>
+                                      )}
+                                  </div>
                                 </div>
                               </div>
+                              {expandedReplies && (
+                                <div className="pl-4">
+                                  {msg.replies?.map((r) => (
+                                    <div key={r.ts}>
+                                      <div
+                                        className={`absolute left-20 mt-[-16px] w-24 h-6 px-4 py-1 ${theme.tapeBg} -rotate-6 clip-zigzag ${theme.tapeCorner} ${theme.groupBorder} ${theme.groupShadow} rounded-md text-xs text-gray-600`}
+                                      ></div>
+
+                                      <div
+                                        className={`mt-[-12px] text-sm text-gray-600 whitespace-pre-wrap bg-white bg-opacity-90 p-4 shadow-md ${theme.groupShadow} border-gray-100 border`}
+                                      >
+                                        <div className="text-xs text-gray-500 mb-1">
+                                          🗨 {r.ts}
+                                        </div>
+                                        <div>{r.text}</div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           )
                         )
