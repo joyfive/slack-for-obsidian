@@ -8,11 +8,15 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['"KoPubWorld Dotum"', '"Pretendard"', "sans-serif"],
-        serif: ['"KoPubWorld Batang"', "serif"],
+        serif: ['"RIDIBatang"', '"KoPubWorld Batang"', "serif"],
+        design: ['"Yeongdo-Rg"', '"Yeongdo-Bd"', '"Yeongdo-It"'],
+        mono: ['"KoPubWorld Dotum Mono"', '"Pretendard Mono"', "monospace"],
       },
       colors: {
-        "legal-yellow": "#FFF9E6",
+        "legal-yellow": "#FAF0DE",
         "legal-line": "#E6E3B4", // legal yellow보다 조금 어두운 색
+        "legal-brown": "#DA8F52", // legal yellow보다 조금 어두운 갈색
+        "legal-dark-brown": "#CD7228", // legal brown보다 조금 어두운 갈색
       },
       backgroundImage: {
         "legal-pad": `

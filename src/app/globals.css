@@ -16,7 +16,20 @@
     --foreground: #ededed;
   }
 }
-
+@font-face {
+  font-family: "Yeongdo-Rg";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/2410-1@1.2/Yeongdo-Rg.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "RIDIBatang";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
 @layer utilities {
   .clip-note-corner {
     clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%);
@@ -128,21 +141,21 @@ body {
 }
 
 h1 {
-  font-family: "KoPub Batang", serif;
+  font-family: "Yeongdo-Rg", san-serif;
   font-weight: bold;
   font-size: 2rem;
   color: var(--foreground);
 }
 
 h2 {
-  font-family: "KoPub Batang", serif;
+  font-family: "RIDIBatang", serif;
   font-weight: bold;
   font-size: 1.5rem;
   color: var(--foreground);
 }
 
 h3 {
-  font-family: "KoPub Batang", serif;
+  font-family: "RIDIBatang", serif;
   font-weight: bold;
   font-size: 1.25rem;
   color: var(--foreground);

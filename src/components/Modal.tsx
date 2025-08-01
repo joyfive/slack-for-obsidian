@@ -24,7 +24,7 @@ export default function Modal({ children, onClose }: ModalProps) {
     >
       <div
         className={`
-          bg-[#C9B798] shadow-color-[#A8926B] shadow-xl overflow-auto
+          bg-legal-brown shadow-color-legal-dark-brown shadow-xl overflow-auto
           w-full h-full rounded-none md:rounded-lg
           md:w-[70vw] md:h-[80vh]
           md:p-6 p-0 pt-6
