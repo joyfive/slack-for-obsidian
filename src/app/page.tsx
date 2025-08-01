@@ -1,21 +1,22 @@
-"use client"
+"use client";
 // Obsidian-themed Mobile-first UI (React + Tailwind)
 // Components: LoginPage, HomePage
 
-import React, { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/button"
-import Spinner from "@/components/spinner"
-import SlackModal from "@/components/SlackModal"
-const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD`
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/button";
+import Spinner from "@/components/spinner";
+import SlackModal from "@/components/SlackModal";
+import TodaySSlipLogo from "@/utils/TodaySSlipLogo.svg";
+const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD`
 
 export default function HomePage() {
-  const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const [title, setTitle] = useState({ text: "오늘의 기록", date: today })
-  const [date, setDate] = useState({ startDate: "", endDate: today })
-  const [err, setErr] = useState("")
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState({ text: "오늘의 기록", date: today });
+  const [date, setDate] = useState({ startDate: "", endDate: today });
+  const [err, setErr] = useState("");
 
   useEffect(() => {
     fetch("/api/auth", {
@@ -27,52 +28,55 @@ export default function HomePage() {
       .then((response) => response)
       .then((data) => {
         if (data.ok) {
-          setIsAuthenticated(true)
-          sessionStorage.setItem("auth_date", today) // Store token in session storage
+          setIsAuthenticated(true);
+          sessionStorage.setItem("auth_date", today); // Store token in session storage
           // Redirect to home page or perform other actions
         } else {
-          console.error("Login failed:", data)
-          setIsAuthenticated(false) // Ensure we set this to false if auth fails
-          router.push("/login") // Redirect to login page
+          console.error("Login failed:", data);
+          setIsAuthenticated(false); // Ensure we set this to false if auth fails
+          router.push("/login"); // Redirect to login page
         }
       })
       .catch((error) => {
-        console.error("Authentication error:", error.message)
-        setIsAuthenticated(false) // Ensure we set this to false if there's an error
-        router.push("/login") // Redirect to login page
-      })
-  }, [router])
+        console.error("Authentication error:", error.message);
+        setIsAuthenticated(false); // Ensure we set this to false if there's an error
+        router.push("/login"); // Redirect to login page
+      });
+  }, [router]);
 
   const todayOpen = () => {
-    setTitle({ text: "오늘의 기록", date: today })
-    setDate({ startDate: "", endDate: today })
-    setIsOpen(true)
-  }
+    setTitle({ text: "오늘의 기록", date: today });
+    setDate({ startDate: "", endDate: today });
+    setIsOpen(true);
+  };
 
   const periodOpen = () => {
-    setTitle({ text: "오늘의 기록", date: date.startDate + "~" + date.endDate })
-    setDate({ startDate: date.startDate, endDate: date.endDate })
+    setTitle({
+      text: "오늘의 기록",
+      date: date.startDate + "~" + date.endDate,
+    });
+    setDate({ startDate: date.startDate, endDate: date.endDate });
     if (!date.startDate || !date.endDate) {
-      setErr("시작일과 종료일을 모두 선택해주세요.")
-      return
+      setErr("시작일과 종료일을 모두 선택해주세요.");
+      return;
     }
     if (new Date(date.startDate) > new Date(date.endDate)) {
-      setErr("시작일은 종료일보다 이전이어야 합니다.")
-      return
+      setErr("시작일은 종료일보다 이전이어야 합니다.");
+      return;
     }
 
     if (date.endDate > today) {
-      setErr("종료일이 오늘 이후일 수 없습니다.")
-      return
+      setErr("종료일이 오늘 이후일 수 없습니다.");
+      return;
     }
-    setErr("")
-    setIsOpen(true)
-  }
+    setErr("");
+    setIsOpen(true);
+  };
 
   if (!isAuthenticated)
     <div className="min-h-screen bg-[#f3f1fa] flex flex-col items-center justify-center p-8">
       <Spinner size={48}></Spinner>
-    </div>
+    </div>;
   else
     return (
       <div className="bg-legal-yellow bg-legal-pad min-h-screen px-6 py-16 flex flex-col justify-between">
@@ -143,5 +147,5 @@ export default function HomePage() {
           ></SlackModal>
         )}
       </div>
-    )
+    );
 }

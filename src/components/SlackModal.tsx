@@ -378,7 +378,7 @@ export default function SlackMessageModal({
                                       ></div>
 
                                       <div
-                                        className={`mt-[-8px] text-sm text-gray-600 whitespace-pre-wrap bg-white bg-opacity-70 p-4 shadow-md ${theme.groupShadow} border-gray-100 border`}
+                                        className={`mt-[-8px] text-sm text-gray-600 whitespace-pre-wrap bg-white bg-opacity- p-4 shadow-md ${theme.groupShadow} border-gray-100 border`}
                                       >
                                         <div className="text-xs text-gray-500 mb-1">
                                           🗨 {r.ts}
