@@ -45,18 +45,8 @@ export default function RootLayout({
           sizes="180x180"
           href="/apple-touch-icon.png"
         />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="192x192"
-          href="/favicon-192x192.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="512x512"
-          href="/android-chrome-512x512.png"
-        />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#FAF0DE" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#111111" />
       </head>
       <body

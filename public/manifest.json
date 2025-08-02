@@ -1,11 +1,11 @@
 {
-  "name": "PWA manifest",
-  "short_name": "PWA manifest",
-  "description": "PWA manifest",
+  "name": "오늘의 SLIP",
+  "short_name": "today-s-slip",
+  "description": "오늘의 작은 조각을, 내일의 기록으로 문서화하는 습관을 돕습니다.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#FAF0DE",
+  "theme_color": "#FAF0DE",
   "icons": [
     {
       "src": "public/android-chrome-192x192.png",
@@ -16,6 +16,12 @@
       "src": "public/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "public/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
