@@ -23,13 +23,6 @@
     }
   },
 
-  "include": [
-    "next-env.d.ts",
-    "types", // ✅ 직접 만든 타입 선언 폴더
-    "src",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["types", "src", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
