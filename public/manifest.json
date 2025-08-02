@@ -19,7 +19,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "public/android-chrome-512x512.png",
+      "src": "public/maskable_icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
