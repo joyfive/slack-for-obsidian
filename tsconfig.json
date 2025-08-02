@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "types": [], // ✅ 이 줄 추가!
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
